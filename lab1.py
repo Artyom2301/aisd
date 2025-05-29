@@ -17,7 +17,7 @@ def process_sequence(seq):
 # Настройки
 buffer_len = 1
 max_buffer_len = 100
-razd = [' ', ',', ';', ':', '?', '!', '&', '*', '.', '\n']
+razd = [' ']
 
 current_lexeme = ''
 current_sequence = []
