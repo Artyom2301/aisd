@@ -19,7 +19,7 @@ def process_sequence(seq):
 with open('test1.txt', 'r', encoding='utf-8') as f:
     text = f.read()
 
-lexemes = re.findall(r'\d+|\D+', text)
+lexemes = re.findall(r'\d+', text)
 
 current_sequence = []
 previous_number = None
