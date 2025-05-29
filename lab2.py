@@ -46,6 +46,5 @@ for lex in lexemes:
             current_sequence = []
             previous_number = None
 
-# После завершения цикла — проверяем, не осталась ли необработанная последовательность
 if current_sequence:
     process_sequence(current_sequence)
