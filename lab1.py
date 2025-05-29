@@ -14,50 +14,28 @@ def process_sequence(seq):
         print(f"Минимальное число в последовательности: {min_val}")
         print(f"Прописью: {number_to_words(min_val)}\n")
 
-# Настройки
-buffer_len = 1
-max_buffer_len = 100
-razd = [' ']
-
-current_lexeme = ''
 current_sequence = []
 previous_number = None
 
 with open('test1.txt', 'r', encoding='utf-8') as file:
-    buffer = file.read(buffer_len)
-    if not buffer:
-        print("Файл пуст.")
-    while buffer:
-        if buffer in razd:
-            if is_number(current_lexeme):
-                number = int(current_lexeme)
-                if previous_number is None or number > previous_number:
-                    current_sequence.append(number)
-                    previous_number = number
-                else:
-                    process_sequence(current_sequence)
-                    current_sequence = [number]
-                    previous_number = number
+    content = file.read()
+    lexemes = content.split(' ') 
+
+    for lexeme in lexemes:
+        if is_number(lexeme):
+            number = int(lexeme)
+            if previous_number is None or number > previous_number:
+                current_sequence.append(number)
+                previous_number = number
             else:
-                # Если встретили не число, завершаем текущую последовательность
-                if current_sequence:
-                    process_sequence(current_sequence)
-                    current_sequence = []
-                    previous_number = None
-            current_lexeme = ''
+                process_sequence(current_sequence)
+                current_sequence = [number]
+                previous_number = number
         else:
-            current_lexeme += buffer
-        buffer = file.read(buffer_len)
+            if current_sequence:
+                process_sequence(current_sequence)
+                current_sequence = []
+                previous_number = None
 
-# Последняя лексема
-if is_number(current_lexeme):
-    number = int(current_lexeme)
-    if previous_number is None or number > previous_number:
-        current_sequence.append(number)
-    else:
-        process_sequence(current_sequence)
-        current_sequence = [number]
-
-# Последняя последовательность
 if current_sequence:
     process_sequence(current_sequence)
