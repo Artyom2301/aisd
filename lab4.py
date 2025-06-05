@@ -25,21 +25,18 @@ def main():
     fill_matrix(A, submatrix)
     print('Матрица A:\n', A)
 
-    # Работаем с подматрицей E
     E = submatrix['E']
-    count_zeros = np.sum(E[:, ::2] == 0)  # Нули в нечетных столбцах (0, 2, ...)
-    sum_odd_rows = np.sum(E[1::2])        # Сумма чисел в нечетных строках (1, 3, ...)
+    count_zeros = np.sum(E[:, ::2] == 0)
+    sum_odd_rows = np.sum(E[1::2])
 
     print(f'Количество нулей в нечётных столбцах E: {count_zeros}')
     print(f'Сумма элементов в нечётных строках E: {sum_odd_rows}')
 
     if count_zeros > sum_odd_rows:
-        # Симметрично меняем B и E (по горизонтали)
         submatrix['B'] = np.fliplr(submatrix['E'])
         submatrix['E'] = np.fliplr(submatrix['B'])
         print('Симметричный обмен B и E:')
-    else:
-        # НЕсимметрично меняем C и E
+    else:        
         submatrix['C'], submatrix['E'] = submatrix['E'], submatrix['C']
         print('НЕсимметричный обмен C и E:')
 
@@ -50,11 +47,9 @@ def main():
     fill_matrix(F, submatrix)
     print('\nМатрица F:\n', F)
 
-    # Определитель A
     det_A = round(np.linalg.det(A), 3)
     print(f'\nОпределитель матрицы A: {det_A}')
 
-    # Сумма диагональных элементов F
     diag_sum_F = np.trace(F)
     print(f'Сумма диагональных элементов матрицы F: {diag_sum_F}')
 
@@ -74,7 +69,6 @@ def main():
     result = np.round(result, 3)
     print('\nРезультат выражения:\n', result)
 
-    # Графики
     plt.figure(figsize=(18, 4))
 
     plt.subplot(1, 4, 1)
@@ -84,7 +78,7 @@ def main():
     plt.subplot(1, 4, 2)
     labels = ['B', 'C', 'D', 'E']
     sizes = [np.sum(submatrix[key]) for key in labels]
-    sizes = [max(0, s) + 0.01 for s in sizes]  # чтобы не было деления на 0
+    sizes = [max(0, s) + 0.01 for s in sizes]
     plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
     plt.title('Круговая диаграмма подматриц')
 
