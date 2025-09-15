@@ -24,11 +24,16 @@ def generate_matrix(N):
     matrix.append(pr_a)
   return matrix
 
+
 # Вывод матрицы A
 def print_matrix(matrix):
     for row in matrix:
         print(" ".join(f"{el:4}" for el in row))
-A = generate_matrix(N)
+A = []
+with open("matrix.txt", "r") as f:
+    for line in f:
+        row = list(map(int, line.split()))  # превращаем строку в список чисел
+        A.append(row)
 print("Матрица A:")
 print_matrix(A)
 
@@ -145,4 +150,5 @@ print_matrix(KAF)
 
 print("Результат К * (F * А) – K * AT:")
 print_matrix(rez)
+
 
