@@ -11,11 +11,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Ввод размерности матрицы и значения K
-N = int(input("Введите размерность матрицы: "))
+#N = int(input("Введите размерность матрицы: "))
 K = int(input("Введите значение K: "))
+with open("matrix.txt", "r") as f:
+    first_line = f.readline()         # читаем первую строку
+    numbers = first_line.split()      # делим по пробелам
+    N = len(numbers)
 
 middle_n = N // 2 + N % 2 # Середина матрицы
-A = np.random.randint(-10, 10, (N, N)) # Генерация матрицы A
+A = []
+with open("matrix.txt", "r") as f:
+    for line in f:
+        row = list(map(int, line.split()))  # превращаем строку в список чисел
+        A.append(row)
+#A = np.random.randint(-10, 10, (N, N)) # Генерация матрицы A
 AT = np.transpose(A) # Транспонированная матрица А
 det_A = np.linalg.det(A) # Определитель матрицы А
 A_1 = np.linalg.inv(A) # Обратная матрица А
