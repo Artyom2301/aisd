@@ -152,3 +152,4 @@ print("Результат К * (F * А) – K * AT:")
 print_matrix(rez)
 
 
+
