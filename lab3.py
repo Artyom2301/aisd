@@ -1,133 +1,148 @@
+# С клавиатуры вводится два числа K и N. Квадратная матрица А(N,N), состоящая из 4-х равных по размерам подматриц B,C,D,E...
+# ...заполняется случайным образом целыми числами в интервале [-10,10]. Для тестирования использовать не случайное заполнение, а целенаправленное.
+# Вариант 17
+# Формируется матрица F следующим образом: если в Е количество нулей в нечетных столбцах в области 4 больше, чем...
+# ...сумма чисел в нечетных строках в области 1, то поменять в Е симметрично области 1 и 2 местами, иначе С и Е поменять местами несимметрично.
+# При этом матрица А не меняется. После чего вычисляется выражение: (К*(A*F)– K*AT . Выводятся по мере формирования А, F и все матричные операции последовательно.
 import random
+from math import ceil
 
-def print_matrix(M, name=""):
-    if name:
-        print(f"\nМатрица {name}:")
-    for row in M:
+# Ввод размерности матрицы и значения K
+N = int(input("Введите размерность матрицы: "))
+K = int(input("Введите значение K: "))
+middle_n = N // 2 + N % 2 # Середина матрицы
+sum_ = 0 # Сумма чисел в подматрице E в области 1 в нечётных строках
+num_zero = 0 # Количество нулей в подматрице E в области 4 в нечётных столбцах
+
+# Генерация случайной матрицы A
+def generate_matrix(N):
+  matrix=[]
+  for i in range(N):
+    pr_a = []
+    for j in range(N):
+        pr_a.append(random.randint(-10, 10))
+    matrix.append(pr_a)
+  return matrix
+
+# Вывод матрицы A
+def print_matrix(matrix):
+    for row in matrix:
         print(" ".join(f"{el:4}" for el in row))
+A = generate_matrix(N)
+print("Матрица A:")
+print_matrix(A)
 
-def transpose(M):
-    return [[M[j][i] for j in range(len(M))] for i in range(len(M[0]))]
+AT = [[0 for i in range(N)] for j in range(N)]  # Транспонированная матрица А
+F = A.copy()  # Задаём матрицу F
+AF = [[0 for i in range(N)] for j in range(N)]  # Результат умножения матрицы A на матрицу F
+KAF = [[0 for i in range(N)] for j in range(N)]  # Результат умножения матрицы AF на коэффициент K
+KAT = [[0 for i in range(N)] for j in range(N)]  # Результат умножения матрицы AT на коэффициент K
+rez = [[0 for i in range(N)] for j in range(N)] # Результат вычитания матриц
 
-def multiply(A, B):
-    result = [[0]*len(B[0]) for _ in range(len(A))]
-    for i in range(len(A)):
-        for j in range(len(B[0])):
-            for k in range(len(B)):
-                result[i][j] += A[i][k] * B[k][j]
-    return result
+# Транспонируем матрицу А
+for i in range(N):
+    for j in range(N):
+        AT[i][j] = A[j][i]
 
-def scale_matrix(M, K):
-    return [[el * K for el in row] for row in M]
+# Разбиваем матрицу А на 4 равных подматрицы
+if N % 2 == 1:
+    E = [A[i][middle_n - 1:N] for i in range(middle_n)]
+    C = [A[i][0:middle_n] for i in range(middle_n - 1, N)]
+    B = [A[i][middle_n - 1:N] for i in range(middle_n - 1, N)]
+    D = [A[i][0:middle_n] for i in range(middle_n)]
+else:
+    E = [A[i][middle_n:N] for i in range(0, middle_n)]
+    C = [A[i][0:middle_n] for i in range(middle_n, N)]
+    B = [A[i][middle_n:N] for i in range(middle_n, N)]
+    D = [A[i][0:middle_n] for i in range(0, middle_n)]
 
-def subtract_matrices(A, B):
-    return [[A[i][j] - B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+# Количество нулей в подматрице E в области 4 в нечётных столбцах
+for i in range(middle_n):
+    for j in range(1,middle_n):
+        if (i < j) and i < ((middle_n - 1 - j)) and (j % 2 != 0):
+            if E[i][j] == 0:
+                num_zero += 1
+# Вычисление суммы чисел в подматрице E в области 1 в нечётных строках
+for i in range(1,middle_n):
+    for j in range(middle_n):
+        if (i < j) and i > ((middle_n - 1 - j)) and (i % 2 != 0):
+            sum_ += E[i][j]
 
-def get_area(i, j, size):
-    if i < j and i + j < size - 1:
-        return 4
-    elif i < j and i + j > size - 1:
-        return 3
-    elif i > j and i + j > size - 1:
-        return 2
-    elif i > j and i + j < size - 1:
-        return 1
+# Замена областей 1 и 2 симметрично в подматрице E
+if num_zero > sum_:
+    print(f'\nВ подматрице "E" количество нулей в нечётных столбцах в области 4({num_zero})')
+    print(f'больше чем сумма чисел в нечётных строках в области 1({sum_})')
+    print('поэтому симметрично меняем местами области 1 и 2 в подматрице E.')
+    for i in range(middle_n-1,ceil(middle_n / 2)-1,-1):
+        for j in range(i+1):
+            E[i][j], E[j][i] = E[j][i], E[i][j]
+    if N % 2 == 1:
+        for i in range(middle_n):
+            for j in range(middle_n - 1, N):
+                F[i][j] = E[i][j - (middle_n - 1)]  # Перезаписываем E
     else:
-        return 0
+        for i in range(0, middle_n):
+            for j in range(middle_n, N):
+                F[i][j] = E[i][j - middle_n]
 
-def count_zeros_area4_odd_cols(E):
-    size = len(E)
-    count = 0
-    for i in range(size):
-        for j in range(size):
-            if get_area(i, j, size) == 4 and j % 2 == 1 and E[i][j] == 0:
-                count += 1
-    return count
-
-def sum_area1_odd_rows(E):
-    size = len(E)
-    total = 0
-    for i in range(size):
-        for j in range(size):
-            if get_area(i, j, size) == 1 and i % 2 == 1:
-                total += E[i][j]
-    return total
-
-def swap_symmetric_areas(E):
-    size = len(E)
-    for i in range(size):
-        for j in range(size):
-            if get_area(i, j, size) == 1:
-                x, y = j, i
-                if get_area(x, y, size) == 2:
-                    E[i][j], E[x][y] = E[x][y], E[i][j]
-    return E
-
-def input_int(prompt, condition=lambda x: True):
-    while True:
-        try:
-            x = int(input(prompt))
-            if condition(x):
-                return x
-        except:
-            pass
-        print("Неверный ввод. Попробуйте снова.")
-
-def main():
-    N = input_int("Введите чётное N > 4: ", lambda x: x > 4 and x % 2 == 0)
-    K = input_int("Введите коэффициент K: ")
-
-    A = [[random.randint(-10, 10) for _ in range(N)] for _ in range(N)]
-    print_matrix(A, "A")
-
-    half = N // 2
-    B = [row[:half] for row in A[:half]]
-    C = [row[half:] for row in A[:half]]
-    D = [row[:half] for row in A[half:]]
-    E = [row[half:] for row in A[half:]]
-
-    print_matrix(B, "B")
-    print_matrix(C, "C")
-    print_matrix(D, "D")
-    print_matrix(E, "E (до изменений)")
-
-    # Анализ областей
-    zeros_area4 = count_zeros_area4_odd_cols(E)
-    sum_area1 = sum_area1_odd_rows(E)
-
-    print(f"\nНулей в нечётных столбцах области 4: {zeros_area4}")
-    print(f"Сумма в нечётных строках области 1: {sum_area1}")
-
-    if zeros_area4 > sum_area1:
-        print("Условие выполнено: меняем области 1 и 2 в E симметрично.")
-        E = swap_symmetric_areas(E)
+# Замена подматриц С и E несимметрично
+else:
+    print(f'\nВ подматрице "E" количество нулей в нечётных столбцах в области 4({num_zero})')
+    print(f'меньше чем сумма чисел в нечётных строках в области 1({sum_}) или равна ей')
+    print('поэтому несимметрично меняем местами подматрицы C и E:')
+    C, E = E, C
+    if N % 2 == 1:
+        for i in range(middle_n - 1, N):  # Перезаписываем C
+            for j in range(middle_n - 1, N):
+                F[i][j] = C[i - (middle_n - 1)][j - (middle_n - 1)]
+        for i in range(middle_n):  # Перезаписываем Е
+            for j in range(middle_n - 1, N):
+                F[i][j] = E[i][j - (middle_n - 1)]
     else:
-        print("Условие НЕ выполнено: меняем C и E несимметрично.")
-        C, E = E, C
+        for i in range(middle_n, N):
+            for j in range(middle_n, N):
+                F[i][j] = C[i - middle_n][j - middle_n]  # Перезаписываем C
+        for i in range(0, middle_n):
+            for j in range(middle_n, N):
+                F[i][j] = E[i][j - middle_n]  # Перезаписываем Е
 
-    # Формируем F из B, C, D, E
-    F = []
-    for i in range(half):
-        F.append(B[i] + C[i])
-    for i in range(half):
-        F.append(D[i] + E[i])
+# K * AT
+for i in range(N):
+    for j in range(N):
+        KAT[i][j] = K * AT[i][j]
 
-    print_matrix(F, "F")
+# A * F
+for i in range(N):
+    for j in range(N):
+        for o in range(N):
+            AF[i][j] += A[i][o] * F[o][j]
 
-    AF = multiply(A, F)
-    print_matrix(AF, "A * F")
+# K * AF
+for i in range(N):
+    for j in range(N):
+        KAF[i][j] = K * AF[i][j]
 
-    KAF = scale_matrix(AF, K)
-    print_matrix(KAF, "K * (A * F)")
+# KFA - KAT
+for i in range(N):
+    for j in range(N):
+        rez[i][j] = KAF[i][j] - KAT[i][j]
 
-    AT = transpose(A)
-    print_matrix(AT, "A^T")
+# Вывод всех операций и полученной матрицы
+print("Матрица AT:")
+print_matrix(AT)
 
-    KAT = scale_matrix(AT, K)
-    print_matrix(KAT, "K * A^T")
+print("Матрица F:")
+print_matrix(F)
 
-    result = subtract_matrices(KAF, KAT)
-    print_matrix(result, "Результат (K*(A*F) – K*A^T)")
+print("Результат K * AT:")
+print_matrix(KAT)
 
-if __name__ == "__main__":
-    main()
+print("Результат A * F:")
+print_matrix(AF)
+
+print("Результат K * AF:")
+print_matrix(KAF)
+
+print("Результат К * (F * А) – K * AT:")
+print_matrix(rez)
+
