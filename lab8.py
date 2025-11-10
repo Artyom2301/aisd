@@ -9,7 +9,6 @@ import csv
 import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
-from collections import defaultdict
 
 # Класс для представления товара
 class Product:
@@ -33,49 +32,84 @@ class Product:
 def read_csv_file():
     try:
         with open('products.csv', 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
+            reader = csv.reader(file)
+            next(reader, None)  # Пропускаем заголовок
             products = []
             for row in reader:
-                product = Product(row['Name'], row['Category'], row.get('Price'), row.get('Quantity'))
-                products.append(product)
+                if len(row) >= 4:
+                    name = row[0].strip()
+                    category = row[1].strip()
+                    price_str = row[2].strip() if len(row) > 2 and row[2].strip() else None
+                    quantity_str = row[3].strip() if len(row) > 3 and row[3].strip() else None
+                    product = Product(name, category, price_str, quantity_str)
+                    products.append(product)
             return products
     except FileNotFoundError:
         print("Файл не найден!")
     except Exception as e:
         print(f"Произошла ошибка при чтении файла: {e}")
+    return []
 
-# Функция для сегментации товаров по категориям
-def segment_by_categories(products):
-    categories = defaultdict(list)
+# Функция для выполнения сегментации по категориям и последующей визуализации
+def perform_segmentation_by_categories():
+    if not products:
+        print("Данные не загружены!")
+        return
+    
+    # Сбор уникальных категорий
+    unique_categories = []
     for product in products:
-        categories[product.category].append(product)
-    return categories
-
-# Функция для сегментации товаров по продажам
-def segment_by_sales(products):
-    sales = defaultdict(list)
-    for product in products:
-        if product.price is not None:
-            total_sales = product.price * product.quantity
-            sales[total_sales].append(product)
-    return sales
+        if product.category not in unique_categories:
+            unique_categories.append(product.category)
+    
+    # Подсчет количества товаров в каждой категории
+    labels = unique_categories[:]
+    sizes = []
+    for category in labels:
+        count = 0
+        for product in products:
+            if product.category == category:
+                count += 1
+        sizes.append(count)
+    
+    visualize_segmentation_by_categories(labels, sizes)
 
 # Функция для выполнения сегментации по продажам и последующей визуализации
 def perform_segmentation_by_sales():
-    global sales
-    sales = segment_by_sales(products)
-    visualize_segmentation_by_sales(sales)
-
-# Функция для выполняемой сегментации по категориям и последующей визуализации
-def perform_segmentation_by_categories():
-    global categories
-    categories = segment_by_categories(products)
-    visualize_segmentation_by_categories(categories)
+    if not products:
+        print("Данные не загружены!")
+        return
+    
+    # Сбор значений продаж
+    sales_values = []
+    for product in products:
+        if product.price is not None and product.quantity is not None:
+            total_sales = product.price * product.quantity
+            sales_values.append(total_sales)
+    
+    # Сбор уникальных значений продаж
+    unique_sales = []
+    for value in sales_values:
+        if value not in unique_sales:
+            unique_sales.append(value)
+    
+    # Подсчет количества товаров для каждого значения продаж
+    labels = [f"{value:.2f}" for value in unique_sales]
+    counts = []
+    for unique_value in unique_sales:
+        count = 0
+        for sales_value in sales_values:
+            if sales_value == unique_value:
+                count += 1
+        counts.append(count)
+    
+    visualize_segmentation_by_sales(labels, counts)
 
 # Функция для визуализации распределения товаров по категориям
-def visualize_segmentation_by_categories(categories):
-    labels = list(categories.keys())
-    sizes = [len(categories[label]) for label in labels]
+def visualize_segmentation_by_categories(labels, sizes):
+    if not labels or not sizes:
+        print("Нет данных для визуализации!")
+        return
     explode = [0.1] * len(labels)
     fig1, ax1 = plt.subplots()
     ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%', startangle=90)
@@ -84,12 +118,13 @@ def visualize_segmentation_by_categories(categories):
     plt.show()
 
 # Функция для визуализации распределения товаров по продажам
-def visualize_segmentation_by_sales(sales):
-    values = list(sales.keys())
-    counts = [len(sales[value]) for value in values]
-    explode = [0.1] * len(values)
+def visualize_segmentation_by_sales(labels, counts):
+    if not labels or not counts:
+        print("Нет данных для визуализации!")
+        return
+    explode = [0.1] * len(labels)
     fig2, ax2 = plt.subplots()
-    ax2.pie(counts, explode=explode, labels=[f"{value:.2f}" for value in values], autopct='%1.1f%%', startangle=90)
+    ax2.pie(counts, explode=explode, labels=labels, autopct='%1.1f%%', startangle=90)
     ax2.axis('equal')  # Для получения равномерной диаграммы
     plt.title("Сегментация товаров по продажам")
     plt.show()
@@ -129,10 +164,8 @@ tk.Label(segment_sales_frame, text="Сегментация по продажам
 segment_sales_button = tk.Button(segment_sales_frame, text="Выполнить сегментацию", command=lambda: perform_segmentation_by_sales())
 segment_sales_button.pack(pady=(10, 0))
 
-# Глобальные переменные для хранения продуктов и результатов сегментации
+# Глобальная переменная для хранения продуктов
 products = []
-categories = {}
-sales = {}
 
 # Функция для загрузки данных
 def load_data():
@@ -145,3 +178,4 @@ def load_data():
 
 # Запуск главного цикла приложения
 root.mainloop()
+
