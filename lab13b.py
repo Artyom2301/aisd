@@ -7,7 +7,7 @@ N=10; CELL=40; LINE=4; BRAID=0.15
 BG='#0f1115'; WALLC='#23262d'; FREEC='#f0f3f6'; GRID='#404350'
 START='#6a5acd'; EXIT='#2e8b57'; PATH='#39d353'; ROACH='#e53935'
 DIRS=['N','E','S','W']; OFF={'N':(-1,0),'E':(0,1),'S':(1,0),'W':(0,-1)}; OPP={'N':'S','S':'N','E':'W','W':'E'}
-ORIENT_BASE='up'  # как ориентирована cockroach.png: 'up' (вверх) или 'right' (вправо)
+ORIENT_BASE='up'  
 
 # ====== side-walls maze ======
 class Maze:
@@ -77,7 +77,7 @@ class App:
         self.cv.grid(row=0,column=0,columnspan=4,padx=12,pady=12)
 
         tk.Button(root,text='Сгенерировать',command=self.gen).grid(row=1,column=0,padx=6,pady=(0,12),sticky='ew')
-        self.run_btn=tk.Button(root,text='Пустить таракана (DFS)',command=self.start_search)
+        self.run_btn=tk.Button(root,text='Пустить робота (DFS)',command=self.start_search)
         self.run_btn.grid(row=1,column=1,columnspan=3,padx=6,pady=(0,12),sticky='ew')
                 
         self.st=tk.StringVar(value='Готово.')
@@ -180,7 +180,6 @@ class App:
         r,c=cell; cx=c*CELL+CELL//2; cy=r*CELL+CELL//2
         if direction: self.last_dir=direction
         if self.roach: self.cv.delete(self.roach)
-        # Без PIL: всегда рисуем простой красный овал как таракана (независимо от направления)
         rad=CELL//3
         self.roach=self.cv.create_oval(cx-rad,cy-rad,cx+rad,cy+rad,fill=ROACH,outline='#550000')
 
@@ -207,7 +206,7 @@ class App:
 
 
 def main():
-    root=tk.Tk(); root.title('Таракан — лабиринт 10×10 (DFS)'); root.configure(bg=BG)
+    root=tk.Tk(); root.title('Робот — лабиринт 10×10 (DFS)'); root.configure(bg=BG)
     App(root)
     root.mainloop()
 
